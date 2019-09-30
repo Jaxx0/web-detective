@@ -8,6 +8,10 @@ provider:
   runtime: python3.7
   stage: dev
   region: eu-west-2
+
+  environment:
+    BUCKET_NAME: ${self:service}-${self:provider.stage}-uploads
+    TABLE_NAME: ${self:service}-${self:provider.stage}-titles
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -42,7 +46,7 @@ resources:
     titlesTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: titles
+        TableName: ${self:service}-${self:provider.stage}-titles
         AttributeDefinitions:
           - AttributeName: title
             AttributeType: S
