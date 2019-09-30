@@ -35,7 +35,22 @@ provider:
         - lambda:AWSLambdaBasicExecutionRole
         - lambda:AWSLambda*/
       Resource: "arn:aws:lambda:eu-west-2:159112706453:function:web-detective-dev-get_url_given_identifier"
-
+    - Effect: "Allow"
+      Action:
+       - dynamodb:Query
+       - dynamodb:Scan
+       - dynamodb:GetItem
+       - dynamodb:PutItem
+       - dynamodb:UpdateItem
+       - dynamodb:DeleteItem
+       - dynamodb:DescribeStream
+       - dynamodb:GetRecords
+       - dynamodb:GetShardIterator
+       - dynamodb:ListStreams
+       - logs:CreateLogGroup
+       - logs:CreateLogStream
+       - logs:PutLogEvents
+      Resource: "arn:aws:dynamodb:eu-west-2:159112706453:table/*"
 
 
 
@@ -59,6 +74,17 @@ functions:
     handler: handler.get_url_given_identifier
     events:
 
+  Dynamo_trigger_function:
+    handler: handler.Dynamo_trigger_stream
+    events:
+      - stream:
+          type: dynamodb
+          batchSize: 100
+          startingPosition: LATEST
+          arn:
+            Fn::GetAtt:
+              - URLsTable
+              - StreamArn
 
 resources:
   Resources:
