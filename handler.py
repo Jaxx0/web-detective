@@ -5,12 +5,12 @@ from files.document_processor import crawler
 
 
 def document_crawler(event, context):
-    # if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
-    #     url = event['queryStringParameters']['query']
-    url = 'https://www.dailymail.com'
-    body = crawler(url)
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(body)
-    }
-    return response
+    if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
+        url = event['queryStringParameters']['query']
+        body = crawler(url)
+        response = {
+            "statusCode": 200,
+            "body": json.dumps(body)
+        }
+        return response
+    return dict(statusCode=200, body=json.dumps(event))

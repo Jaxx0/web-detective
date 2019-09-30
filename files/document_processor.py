@@ -10,5 +10,5 @@ def crawler(url):
         soup = BeautifulSoup(page.text, 'html.parser')
         title = soup.find('title').get_text()
         return {'title': title}
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.ConnectionError as e:
         return str(e)
