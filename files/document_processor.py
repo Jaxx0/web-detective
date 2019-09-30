@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
+""" This function crawls a URL and extracts the title from the document"""
+
 
 def crawler(url):
     try:

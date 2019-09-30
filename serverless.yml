@@ -8,6 +8,10 @@ provider:
 
 
 functions:
-  hello:
-    handler: handler.hello
+  document_crawler:
+    handler: handler.document_crawler
+    events:
+      - http:
+          path: scrape
+          method: get
 
