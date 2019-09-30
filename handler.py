@@ -51,13 +51,11 @@ def post_url_and_identity(event, context):
     try:
         if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
             url = event['queryStringParameters']['query']
-            # url = "https://www.wikipedia.com"
 
             identifier = create_partition_key()  # created identifier
             db_store = save_to_db(identifier, url, table=os.environ['URL_TABLE_NAME'])  # saves url keyed to the identifier
 
             # Stores url to bucket with an identifier filename
-            file_name = create_file_name()  # The name the file is stored under
             bucket_store = save_to_s3(bucket_name=os.environ['BUCKET_NAME'], file_name=identifier, data=url)
 
             if db_store['ResponseMetadata']['HTTPStatusCode'] == 200 and bucket_store['ResponseMetadata']['HTTPStatusCode'] == 200:

@@ -79,7 +79,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          batchSize: 100
+          batchSize: 1
           startingPosition: LATEST
           arn:
             Fn::GetAtt:

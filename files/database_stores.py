@@ -2,13 +2,14 @@ import uuid
 import boto3
 from boto3.dynamodb.conditions import Key
 
+"""variables are used """
+current_region = boto3.session.Session().region_name
+db = boto3.resource('dynamodb', region_name=current_region)
+
 """ This function receives the extracted title and table as an argument and stores it in the Table of DynamoDB"""
 
 
 def post_record(title, table):
-    current_region = boto3.session.Session().region_name
-    db = boto3.resource('dynamodb', region_name=current_region)
-
     table = db.Table(table)
     try:
         response = table.put_item(
@@ -34,8 +35,6 @@ def create_partition_key():
 
 
 def save_to_db(identifier, url, table):
-    current_region = boto3.session.Session().region_name
-    db = boto3.resource('dynamodb', region_name=current_region)
     table = db.Table(str(table))
     try:
         response = table.put_item(
@@ -55,8 +54,6 @@ def save_to_db(identifier, url, table):
 
 
 def get_URL_from_db(identifier, table):
-    current_region = boto3.session.Session().region_name
-    db = boto3.resource('dynamodb', region_name=current_region)
     table = db.Table(table)
     try:
         response = table.get_item(
@@ -75,8 +72,6 @@ def get_URL_from_db(identifier, table):
 
 
 def update_record(identifier, s3_url, title, table):
-    current_region = boto3.session.Session().region_name
-    db = boto3.resource('dynamodb', region_name=current_region)
     table = db.Table(table)
     try:
         response = table.update_item(
@@ -102,8 +97,6 @@ def update_record(identifier, s3_url, title, table):
 
 
 def query(identifier, table):
-    current_region = boto3.session.Session().region_name
-    db = boto3.resource('dynamodb', region_name=current_region)
     table = db.Table(table)
     try:
         response = table.query(
