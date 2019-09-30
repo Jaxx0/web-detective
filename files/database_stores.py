@@ -107,7 +107,7 @@ def query(identifier, table):
     table = db.Table(table)
     try:
         response = table.query(
-            KeyConditionExpression=Key('identifier').eq(identifier)
+            KeyConditionExpression=Key('identifier').eq(identifier))
     except Exception as e:
         return str(e)
     else:
