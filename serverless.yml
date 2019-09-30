@@ -18,3 +18,25 @@ functions:
           path: scrape
           method: get
 
+resources:
+  Resources:
+    uploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-${self:provider.stage}-uploads
+
+    titlesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: titles
+        AttributeDefinitions:
+          - AttributeName: title
+            AttributeType: S
+        KeySchema:
+          - AttributeName: title
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+
