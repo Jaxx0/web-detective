@@ -1,3 +1,5 @@
+import uuid
+
 import boto3
 
 """ This function receives the extracted title and table as an argument and stores it in the Table of DynamoDB"""
@@ -18,3 +20,11 @@ def post_record(title, table):
         return str(e)
     else:
         return response
+
+
+"""  function generates a uuid to be used as the partition key in URLs Table of the NoSQL DynamoDB """
+
+
+def create_partition_key():
+    # This generates a unique partition key between 3 to 63 chars long
+    return str(uuid.uuid4())
