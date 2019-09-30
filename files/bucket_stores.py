@@ -24,7 +24,7 @@ def get_s3_object_url(bucket_name, file_name,):
     return url
 
 
-""" This fucntion generates a unique universal id to use as filename"""
+""" This function generates a unique universal id to use as filename"""
 
 
 def create_file_name():

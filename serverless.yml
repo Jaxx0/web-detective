@@ -24,8 +24,10 @@ provider:
       Resource: "arn:aws:dynamodb:eu-west-2:159112706453:table/*"
     - Effect: "Allow"
       Action:
-        - s3:*Object
-      Resource: "arn:aws:s3:::crawl-dev-uploads/*"
+        - s3:*
+      Resource: "arn:aws:s3:::web-detective-dev-uploads/*"
+
+
 
 
 functions:
