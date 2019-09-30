@@ -49,3 +49,23 @@ def save_to_db(identifier, url, table):
         return str(e)
     else:
         return response
+
+
+"""This function retrieves a URL from the DynamoDB record that is associated with a given identifier"""
+
+
+def get_URL_from_db(identifier, table):
+    current_region = boto3.session.Session().region_name
+    db = boto3.resource('dynamodb', region_name=current_region)
+    table = db.Table(table)
+    try:
+        response = table.get_item(
+            Key={
+                'id': str(identifier),
+            }
+        )
+    except Exception as e:
+        return str(e)
+    else:
+        return response['Item']
+
