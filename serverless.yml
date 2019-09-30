@@ -12,6 +12,8 @@ provider:
   environment:
     BUCKET_NAME: ${self:service}-${self:provider.stage}-uploads
     TABLE_NAME: ${self:service}-${self:provider.stage}-titles
+    URL_TABLE_NAME: ${self:service}-${self:provider.stage}-urls
+
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -54,6 +56,20 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: title
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    URLsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-urls
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
