@@ -74,8 +74,8 @@ functions:
     handler: handler.get_url_given_identifier
     events:
 
-  Dynamo_trigger_function:
-    handler: handler.Dynamo_trigger_stream
+  dynamo_trigger_stream:
+    handler: handler.dynamo_trigger_stream
     events:
       - stream:
           type: dynamodb
@@ -120,5 +120,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
 
 
