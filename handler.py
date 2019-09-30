@@ -84,6 +84,7 @@ def post_url_and_identity(event, context):
 def get_url_given_identifier(event, context):
     try:
         identifier = event['identifier']
+        # This debug print should be visible in the logs
         print(identifier)
 
         obj = get_URL_from_db(identifier, table=os.environ['URL_TABLE_NAME'])  # retrieved URL from the database
