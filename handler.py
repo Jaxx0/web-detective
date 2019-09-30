@@ -46,14 +46,14 @@ DynamoDB record keyed to that identifier, along with the state of “PENDING”,
 
 
 def post_url_and_identity(event, context):
-    if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
-        url = event['queryStringParameters']['query']
-        # url = "https://www.wikipedia.com"
+    # if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
+    #     url = event['queryStringParameters']['query']
+    url = "https://www.amazon.com"
 
-        identifier = create_partition_key()  # created identifier
-        saved = save_to_db(identifier, url, table=os.environ['URL_TABLE_NAME'])  # saves url keyed to the identifier
+    identifier = create_partition_key()  # created identifier
+    saved = save_to_db(identifier, url, table=os.environ['URL_TABLE_NAME'])  # saves url keyed to the identifier
 
-        if saved['ResponseMetadata']['HTTPStatusCode'] == 200:
-            # To Do - Invoke processing function asynchronously
-            return dict(statusCode=200, body=json.dumps(identifier))
-        return dict(statusCode=200, body=json.dumps(event))
+    if saved['ResponseMetadata']['HTTPStatusCode'] == 200:
+        # To Do - Invoke processing function asynchronously
+        return dict(statusCode=200, body=json.dumps(identifier))
+        # return dict(statusCode=200, body=json.dumps(event))

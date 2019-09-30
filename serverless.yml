@@ -40,6 +40,13 @@ functions:
           path: scrape
           method: get
 
+  post_url_and_identity:
+    handler: handler.post_url_and_identity
+    events:
+      - http:
+          path: get/url
+          method: get
+
 resources:
   Resources:
     uploadBucket:
