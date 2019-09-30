@@ -61,39 +61,8 @@ def post_url_and_identity(event, context):
             bucket_store = save_to_s3(bucket_name=os.environ['BUCKET_NAME'], file_name=identifier, data=url)
 
             if db_store['ResponseMetadata']['HTTPStatusCode'] == 200 and bucket_store['ResponseMetadata']['HTTPStatusCode'] == 200:
-
-                # This invokes the web-detective-dev-get_url_given_identifier function asynchronously ie
-                # InvocationType "Event" and passes in the identifier in it's payload
-                client = boto3.client('lambda', region_name=str(boto3.session.Session().region_name))
-                payload = {'identifier': identifier}
-                resp = client.invoke(FunctionName="web-detective-dev-get_url_given_identifier",
-                                     InvocationType="Event", Payload=json.dumps(payload))
-
                 return dict(statusCode=200, body=json.dumps(identifier))
             return dict(statusCode=200, body=json.dumps(event))
-
-    except Exception as e:
-        return dict(statusCode=200, body=str(e))
-
-
-""" This CLIENT function receives the identifier, reads the URL from the DynamoDB record keyed to that identifier, 
-    makes a request to that URL. It then processes the response to extract the title as before, 
-    and updates the DynamoDB record to include the S3 URL, extracted title, and updates the state to “PROCESSED”. """
-
-
-def get_url_given_identifier(event, context):
-    try:
-        identifier = event['identifier']
-        # This debug print should be visible in the logs
-        print(identifier)
-
-        obj = get_URL_from_db(identifier, table=os.environ['URL_TABLE_NAME'])  # retrieved URL from the database
-        response = crawler(obj['url'])  # response from the request processor
-
-        title = response['title']
-        s3_url = get_s3_object_url(os.environ['BUCKET_NAME'], file_name=identifier)
-        response = update_record(identifier, s3_url, title, table=os.environ['URL_TABLE_NAME'])
-        return dict(statusCode=200, body=json.dumps(response))
 
     except Exception as e:
         return dict(statusCode=200, body=str(e))
