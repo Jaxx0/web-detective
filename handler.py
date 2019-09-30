@@ -28,7 +28,8 @@ def document_crawler(event, context):
 
             # Returns the extracted title and the S3 URL of the stored response object
 
-            if db_store['ResponseMetadata']['HTTPStatusCode'] == 200 and bucket_store['ResponseMetadata']['HTTPStatusCode'] == 200:
+            if db_store['ResponseMetadata']['HTTPStatusCode'] == 200 and bucket_store['ResponseMetadata'][
+                'HTTPStatusCode'] == 200:
                 url = get_s3_object_url(bucket_name=os.environ['BUCKET_NAME'], file_name=file_name)
                 body = dict(title=json.dumps(body['title']), url=url)
                 return dict(statusCode=200, body=json.dumps(body))
@@ -50,4 +51,9 @@ def post_url_and_identity(event, context):
         # url = "https://www.wikipedia.com"
 
         identifier = create_partition_key()  # created identifier
-        saved = save_to_db(identifier, url, table=os.environ[''])  # saves url keyed to the identifier
+        saved = save_to_db(identifier, url, table=os.environ['URL_TABLE_NAME'])  # saves url keyed to the identifier
+
+        if saved['ResponseMetadata']['HTTPStatusCode'] == 200:
+            # To Do - Invoke processing function asynchronously
+            return dict(statusCode=200, body=json.dumps(identifier))
+        return dict(statusCode=200, body=json.dumps(event))
