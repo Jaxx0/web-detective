@@ -16,11 +16,11 @@ def save_to_s3(bucket_name, file_name, data):
 """ Retrieves the s3 object URL of the stored data """
 
 
-def get_s3_object_url():
+def get_s3_object_url(bucket_name, file_name,):
     session = boto3.session.Session()
     current_region = session.region_name
-    url = "https://{}.s3.{}.amazonaws.com/{}".format("scrapper-dev-uploads",
-                                                     current_region, "scrapped-title")
+    url = "https://{}.s3.{}.amazonaws.com/{}".format(str(bucket_name),
+                                                     current_region, str(file_name))
     return url
 
 
