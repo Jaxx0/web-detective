@@ -2,8 +2,8 @@ import json
 import os
 
 from files.document_processor import crawler
-from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
+from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db, update_record
 
 """This function receives a URL as an argument from the API gateway and passes it to the crawler function It then 
 stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored 
@@ -59,7 +59,7 @@ def post_url_and_identity(event, context):
             bucket_store = save_to_s3(bucket_name=os.environ['BUCKET_NAME'], file_name=identifier, data=url)
 
             if db_store['ResponseMetadata']['HTTPStatusCode'] == 200 and bucket_store['ResponseMetadata']['HTTPStatusCode'] == 200:
-                # To Do - Invoke processing function asynchronously
+                # To Do - Invoke processing function asynchronously and pass in the identifier
                 return dict(statusCode=200, body=json.dumps(identifier))
             return dict(statusCode=200, body=json.dumps(event))
 
@@ -74,17 +74,15 @@ def post_url_and_identity(event, context):
 
 def get_url_given_identifier(event, context):
     try:
-        if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
-            identifier = event['queryStringParameters']['query']  # input identifier from the API gateway
+        identifier = event
 
-            obj = get_URL_from_db(identifier, table=os.environ['URL_TABLE_NAME'])  # retrieved URL from the database
-            response = crawler(obj['url'])  # response from the request processor
+        obj = get_URL_from_db(identifier, table=os.environ['URL_TABLE_NAME'])  # retrieved URL from the database
+        response = crawler(obj['url'])  # response from the request processor
 
-            title = response['title']
-            s3_url = get_s3_object_url(os.environ['BUCKET_NAME'], file_name=identifier)
-            response = update_record(identifier, s3_url, title)
-            return dict(statusCode=200, body=json.dumps(response))
-            return dict(statusCode=200, body=json.dumps(obj))
+        title = response['title']
+        s3_url = get_s3_object_url(os.environ['BUCKET_NAME'], file_name=identifier)
+        response = update_record(identifier, s3_url, title, table=os.environ['URL_TABLE_NAME'])
+        return dict(statusCode=200, body=json.dumps(response))
 
     except Exception as e:
         return dict(statusCode=200, body=str(e))
