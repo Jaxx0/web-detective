@@ -1,5 +1,6 @@
 import json
 from files.document_processor import crawler
+from files.database_stores import post_record
 
 """ This function receives a URL as an argument from the API gateway and passes it to the crawler function"""
 
@@ -12,5 +13,7 @@ def document_crawler(event, context):
             "statusCode": 200,
             "body": json.dumps(body)
         }
-        return response
+        # To Do - Store body to bucket and extracted title to titles table in DynamoDb
+        data = post_record(body['title']) # Stores extracted title to DB
+
     return dict(statusCode=200, body=json.dumps(event))

@@ -1,5 +1,7 @@
 import boto3
 
+""" This function receives the extracted title as an argument and stores it in the titles Table of DynamoDB"""
+
 
 def post_record(title):
     current_region = boto3.session.Session().region_name
