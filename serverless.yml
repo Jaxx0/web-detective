@@ -47,6 +47,14 @@ functions:
           path: get/url
           method: get
 
+  get_url_given_identifier:
+    handler: handler.get_url_given_identifier
+    events:
+      - http:
+          path: get/identifier
+          method: get
+
+
 resources:
   Resources:
     uploadBucket:

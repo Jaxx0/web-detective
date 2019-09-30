@@ -2,7 +2,7 @@ import json
 import os
 
 from files.document_processor import crawler
-from files.database_stores import post_record, create_partition_key, save_to_db
+from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
 
 """This function receives a URL as an argument from the API gateway and passes it to the crawler function It then 
@@ -58,6 +58,27 @@ def post_url_and_identity(event, context):
                 # To Do - Invoke processing function asynchronously
                 return dict(statusCode=200, body=json.dumps(identifier))
             return dict(statusCode=200, body=json.dumps(event))
+
+    except Exception as e:
+        return dict(statusCode=200, body=str(e))
+
+
+""" This function receives the identifier, reads the URL from the DynamoDB record keyed to that identifier, 
+    makes a request to that URL, and gets the response. It the processes the response to extract the title as before, 
+    and updates the DynamoDB record to include the S3 URL, extracted title, and updates the state to “PROCESSED”. """
+
+
+def get_url_given_identifier(event, context):
+    try:
+        if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
+            identifier = event['queryStringParameters']['query']  # input identifier from the API gateway
+
+            obj = get_URL_from_db(identifier)  # retrieved URL from the database
+            response = crawler(obj['url'])  # response from the request processor
+
+            title = response['title']
+            s3_url = get_s3_object_url()
+            return dict(statusCode=200, body=json.dumps(obj))
 
     except Exception as e:
         return dict(statusCode=200, body=str(e))
