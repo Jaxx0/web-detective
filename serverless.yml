@@ -1,0 +1,20 @@
+service: web-detective
+
+plugins:
+  - serverless-python-requirements
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: dev
+  region: eu-west-2
+
+
+functions:
+  document_crawler:
+    handler: handler.document_crawler
+    events:
+      - http:
+          path: scrape
+          method: get
+
