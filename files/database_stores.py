@@ -36,7 +36,7 @@ def create_partition_key():
 def save_to_db(identifier, url, table):
     current_region = boto3.session.Session().region_name
     db = boto3.resource('dynamodb', region_name=current_region)
-    table = db.Table(table)
+    table = db.Table(str(table))
     try:
         response = table.put_item(
             Item={

@@ -2,7 +2,7 @@ import json
 import os
 
 from files.document_processor import crawler
-from files.database_stores import post_record
+from files.database_stores import post_record, create_partition_key, save_to_db
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
 
 """This function receives a URL as an argument from the API gateway and passes it to the crawler function It then 
@@ -37,3 +37,17 @@ def document_crawler(event, context):
 
     except Exception as e:
         return dict(statusCode=200, body=str(e))
+
+
+""" This Lambda function receives a URL as an argument, creates an identifier for the request, stores the URL in a 
+DynamoDB record keyed to that identifier, along with the state of “PENDING”, invokes the processing function
+ ​asynchronously​ with the identifier, and returns the identifier to the client. """
+
+
+def post_url_and_identity(event, context):
+    if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
+        url = event['queryStringParameters']['query']
+        # url = "https://www.wikipedia.com"
+
+        identifier = create_partition_key()  # created identifier
+        saved = save_to_db(identifier, url, table=os.environ[''])  # saves url keyed to the identifier
