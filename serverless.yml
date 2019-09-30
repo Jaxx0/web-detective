@@ -12,6 +12,8 @@ provider:
   environment:
     BUCKET_NAME: ${self:service}-${self:provider.stage}-uploads
     TABLE_NAME: ${self:service}-${self:provider.stage}-titles
+    URL_TABLE_NAME: ${self:service}-${self:provider.stage}-urls
+
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -26,6 +28,14 @@ provider:
       Action:
         - s3:*
       Resource: "arn:aws:s3:::web-detective-dev-uploads/*"
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+        - lambda:AWSLambdaBasicExecutionRole
+        - lambda:AWSLambda*/
+      Resource: "arn:aws:lambda:eu-west-2:159112706453:function:web-detective-dev-get_url_given_identifier"
+
 
 
 
@@ -37,6 +47,18 @@ functions:
       - http:
           path: scrape
           method: get
+
+  post_url_and_identity:
+    handler: handler.post_url_and_identity
+    events:
+      - http:
+          path: get/url
+          method: get
+
+  get_url_given_identifier:
+    handler: handler.get_url_given_identifier
+    events:
+
 
 resources:
   Resources:
@@ -54,6 +76,20 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: title
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    URLsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-urls
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
