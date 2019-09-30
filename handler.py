@@ -5,7 +5,7 @@ import boto3
 
 from files.document_processor import crawler
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
-from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db, update_record
+from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db, update_record, query
 
 """This function receives a URL as an argument from the API gateway and passes it to the crawler function It then 
 stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored 
@@ -51,24 +51,14 @@ def post_url_and_identity(event, context):
     try:
         if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
             url = event['queryStringParameters']['query']
-            # url = "https://www.wikipedia.com"
 
             identifier = create_partition_key()  # created identifier
             db_store = save_to_db(identifier, url, table=os.environ['URL_TABLE_NAME'])  # saves url keyed to the identifier
 
             # Stores url to bucket with an identifier filename
-            file_name = create_file_name()  # The name the file is stored under
             bucket_store = save_to_s3(bucket_name=os.environ['BUCKET_NAME'], file_name=identifier, data=url)
 
             if db_store['ResponseMetadata']['HTTPStatusCode'] == 200 and bucket_store['ResponseMetadata']['HTTPStatusCode'] == 200:
-
-                # This invokes the web-detective-dev-get_url_given_identifier function asynchronously ie
-                # InvocationType "Event" and passes in the identifier in it's payload
-                client = boto3.client('lambda', region_name=str(boto3.session.Session().region_name))
-                payload = {'identifier': identifier}
-                resp = client.invoke(FunctionName="web-detective-dev-get_url_given_identifier",
-                                     InvocationType="Event", Payload=json.dumps(payload))
-
                 return dict(statusCode=200, body=json.dumps(identifier))
             return dict(statusCode=200, body=json.dumps(event))
 
@@ -76,24 +66,27 @@ def post_url_and_identity(event, context):
         return dict(statusCode=200, body=str(e))
 
 
-""" This CLIENT function receives the identifier, reads the URL from the DynamoDB record keyed to that identifier, 
-    makes a request to that URL. It then processes the response to extract the title as before, 
-    and updates the DynamoDB record to include the S3 URL, extracted title, and updates the state to “PROCESSED”. """
+""" This function gets called whenever the database table gets populated with a data record
+    It retrieves the identifier to retrieve the URL, makes a request to the URL to obtain a response and 
+    processes the response to extract the title and obtain the s3 URL of the response object and then
+                            updates the status to "PROCESSED" """
 
 
-def get_url_given_identifier(event, context):
+def dynamo_trigger_stream(event, context):
     try:
-        identifier = event['identifier']
-        # This debug print should be visible in the logs
-        print(identifier)
-
-        obj = get_URL_from_db(identifier, table=os.environ['URL_TABLE_NAME'])  # retrieved URL from the database
-        response = crawler(obj['url'])  # response from the request processor
-
-        title = response['title']
-        s3_url = get_s3_object_url(os.environ['BUCKET_NAME'], file_name=identifier)
-        response = update_record(identifier, s3_url, title, table=os.environ['URL_TABLE_NAME'])
-        return dict(statusCode=200, body=json.dumps(response))
+        current_region = boto3.session.Session().region_name
+        db = boto3.resource('dynamodb', region_name=current_region)
+        table = db.Table(os.environ['URL_TABLE_NAME'])
+        response = table.scan()
+        for resp in response['Items']:
+            if resp['state'] == "PENDING":
+                id = resp['id']
+                url = resp['url']
+                response = crawler(url)
+                title = response['title']
+                s3_url = get_s3_object_url(os.environ['BUCKET_NAME'], file_name=id)
+                response = update_record(id, s3_url, title, table=os.environ['URL_TABLE_NAME'])
+                return dict(statusCode=200, body=json.dumps(response))
 
     except Exception as e:
         return dict(statusCode=200, body=str(e))
