@@ -1,3 +1,5 @@
+import uuid
+
 import boto3
 import json
 
@@ -20,3 +22,11 @@ def get_s3_object_url():
     url = "https://{}.s3.{}.amazonaws.com/{}".format("scrapper-dev-uploads",
                                                      current_region, "scrapped-title")
     return url
+
+
+""" This fucntion generates a unique universal id to use as filename"""
+
+
+def create_file_name():
+    # This generates a name that is between 3 to 63 chars long
+    return str(uuid.uuid4())
