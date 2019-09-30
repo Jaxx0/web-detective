@@ -1,6 +1,6 @@
 import uuid
-
 import boto3
+from boto3.dynamodb.conditions import Key
 
 """ This function receives the extracted title and table as an argument and stores it in the Table of DynamoDB"""
 
@@ -98,3 +98,17 @@ def update_record(identifier, s3_url, title, table):
         return response
 
 
+""" This function performs a query on the Table for data given an identifier"""
+
+
+def query(identifier, table):
+    current_region = boto3.session.Session().region_name
+    db = boto3.resource('dynamodb', region_name=current_region)
+    table = db.Table(table)
+    try:
+        response = table.query(
+            KeyConditionExpression=Key('identifier').eq(identifier)
+    except Exception as e:
+        return str(e)
+    else:
+        return response['Item']
