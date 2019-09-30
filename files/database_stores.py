@@ -69,3 +69,32 @@ def get_URL_from_db(identifier, table):
     else:
         return response['Item']
 
+
+"""This function updates the DynamoDB record to include the s3 URL object, 
+        extracted title and updates the state to PROCESSED """
+
+
+def update_record(identifier, s3_url, title, table):
+    current_region = boto3.session.Session().region_name
+    db = boto3.resource('dynamodb', region_name=current_region)
+    table = db.Table(table)
+    try:
+        response = table.update_item(
+            Key={
+                'id': str(identifier)
+            },
+            UpdateExpression="SET s3_url = :s3, title = :t, #process_status=:ps",
+            ExpressionAttributeNames ={"#process_status": "state"},
+            ExpressionAttributeValues={
+                ':s3': s3_url,
+                ':t': title,
+                ':ps': 'PROCESSED'
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+    except Exception as e:
+        return str(e)
+    else:
+        return response
+
+

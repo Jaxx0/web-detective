@@ -81,7 +81,9 @@ def get_url_given_identifier(event, context):
             response = crawler(obj['url'])  # response from the request processor
 
             title = response['title']
-            # s3_url = get_s3_object_url()
+            s3_url = get_s3_object_url(os.environ['BUCKET_NAME'], file_name=identifier)
+            response = update_record(identifier, s3_url, title)
+            return dict(statusCode=200, body=json.dumps(response))
             return dict(statusCode=200, body=json.dumps(obj))
 
     except Exception as e:
