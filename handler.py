@@ -1,6 +1,8 @@
 import json
 import os
 
+import boto3
+
 from files.document_processor import crawler
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
 from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db, update_record
@@ -59,7 +61,14 @@ def post_url_and_identity(event, context):
             bucket_store = save_to_s3(bucket_name=os.environ['BUCKET_NAME'], file_name=identifier, data=url)
 
             if db_store['ResponseMetadata']['HTTPStatusCode'] == 200 and bucket_store['ResponseMetadata']['HTTPStatusCode'] == 200:
-                # To Do - Invoke processing function asynchronously and pass in the identifier
+
+                # This invokes the web-detective-dev-get_url_given_identifier function asynchronously ie
+                # InvocationType "Event" and passes in the identifier in it's payload
+                client = boto3.client('lambda', region_name=str(boto3.session.Session().region_name))
+                payload = {'identifier': identifier}
+                resp = client.invoke(FunctionName="web-detective-dev-get_url_given_identifier",
+                                     InvocationType="Event", Payload=json.dumps(payload))
+
                 return dict(statusCode=200, body=json.dumps(identifier))
             return dict(statusCode=200, body=json.dumps(event))
 
@@ -74,7 +83,8 @@ def post_url_and_identity(event, context):
 
 def get_url_given_identifier(event, context):
     try:
-        identifier = event
+        identifier = event['identifier']
+        print(identifier)
 
         obj = get_URL_from_db(identifier, table=os.environ['URL_TABLE_NAME'])  # retrieved URL from the database
         response = crawler(obj['url'])  # response from the request processor
