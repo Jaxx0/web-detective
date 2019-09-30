@@ -28,3 +28,24 @@ def post_record(title, table):
 def create_partition_key():
     # This generates a unique partition key between 3 to 63 chars long
     return str(uuid.uuid4())
+
+
+"""This function stores the identifier and the URL to the table of the DynamoDB"""
+
+
+def save_to_db(identifier, url, table):
+    current_region = boto3.session.Session().region_name
+    db = boto3.resource('dynamodb', region_name=current_region)
+    table = db.Table(table)
+    try:
+        response = table.put_item(
+            Item={
+                'id': str(identifier),
+                'url': url,
+                'state': 'PENDING'
+            }
+        )
+    except Exception as e:
+        return str(e)
+    else:
+        return response
