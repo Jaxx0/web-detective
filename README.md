@@ -39,9 +39,7 @@ This version accepts a URL as an argument, creates an identifier for the request
 The proccessing function invoked receives the response, extracts the title and updates the DynamoDB record to include the S3 URL, extracted title, and update the state to “PROCESSED”.
 
 
-[Fourth Version](https://github.com/Jaxx0/web-detective/releases/tag/V4.0
-
-)
+[Fourth Version](https://github.com/Jaxx0/web-detective/releases/tag/V4.0)
 This version uses [DynamoDB streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) instead of an explicit function invocation in the third version.
 
 
