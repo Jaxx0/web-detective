@@ -7,12 +7,12 @@ from files.document_processor import crawler
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
 from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db, update_record
 
-"""This function receives a URL as an argument from the API gateway and passes it to the crawler function It then 
-stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored 
-response object """
-
 
 def document_crawler(event, context):
+    """This function receives a URL as an argument from the API gateway and passes it to the crawler function It then
+    stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored
+    response object """
+
     try:
         if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
             url = event['queryStringParameters']['query']
@@ -42,12 +42,11 @@ def document_crawler(event, context):
         return dict(statusCode=200, body=str(e))
 
 
-""" This Lambda function receives a URL as an argument, creates an identifier for the request, stores the URL in a 
-DynamoDB record keyed to that identifier, along with the state of “PENDING”, invokes the processing function
- ​asynchronously​ with the identifier, and returns the identifier to the client. """
-
-
 def post_url_and_identity(event, context):
+    """ This Lambda function receives a URL as an argument, creates an identifier for the request, stores the URL in a
+    DynamoDB record keyed to that identifier, along with the state of “PENDING”, invokes the processing function
+     ​asynchronously​ with the identifier, and returns the identifier to the client. """
+
     try:
         if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
             url = event['queryStringParameters']['query']
@@ -76,12 +75,11 @@ def post_url_and_identity(event, context):
         return dict(statusCode=200, body=str(e))
 
 
-""" This CLIENT function receives the identifier, reads the URL from the DynamoDB record keyed to that identifier, 
-    makes a request to that URL. It then processes the response to extract the title as before, 
-    and updates the DynamoDB record to include the S3 URL, extracted title, and updates the state to “PROCESSED”. """
-
-
 def get_url_given_identifier(event, context):
+    """ This CLIENT function receives the identifier, reads the URL from the DynamoDB record keyed to that identifier,
+        makes a request to that URL. It then processes the response to extract the title as before,
+        and updates the DynamoDB record to include the S3 URL, extracted title, and updates the state to “PROCESSED”. """
+
     try:
         identifier = event['identifier']
         # This debug print should be visible in the logs
