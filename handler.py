@@ -5,12 +5,12 @@ from files.document_processor import crawler
 from files.database_stores import post_record
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
 
-"""This function receives a URL as an argument from the API gateway and passes it to the crawler function It then 
-stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored 
-response object """
-
 
 def document_crawler(event, context):
+    """This function receives a URL as an argument from the API gateway and passes it to the crawler function It then
+    stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored
+    response object """
+
     try:
         if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
             url = event['queryStringParameters']['query']

@@ -1,3 +1,3 @@
-beautifulsoup4
-requests
-
+requests==2.22.0
+boto3==1.9.238
+beautifulsoup4==4.8.0
