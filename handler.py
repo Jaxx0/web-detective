@@ -7,12 +7,12 @@ from files.document_processor import crawler
 from files.bucket_stores import create_file_name, save_to_s3, get_s3_object_url
 from files.database_stores import post_record, create_partition_key, save_to_db, get_URL_from_db, update_record, query
 
-"""This function receives a URL as an argument from the API gateway and passes it to the crawler function It then 
-stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored 
-response object """
-
 
 def document_crawler(event, context):
+    """This function receives a URL as an argument from the API gateway and passes it to the crawler function It then
+    stores the response to an s3 bucket an a DynamoDB and returns the extracted title and the S3 URL of the stored
+    response object """
+
     try:
         if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
             url = event['queryStringParameters']['query']
@@ -42,12 +42,11 @@ def document_crawler(event, context):
         return dict(statusCode=200, body=str(e))
 
 
-""" This Lambda function receives a URL as an argument, creates an identifier for the request, stores the URL in a 
-DynamoDB record keyed to that identifier, along with the state of “PENDING”, invokes the processing function
- ​asynchronously​ with the identifier, and returns the identifier to the client. """
-
-
 def post_url_and_identity(event, context):
+    """ This Lambda function receives a URL as an argument, creates an identifier for the request, stores the URL in a
+    DynamoDB record keyed to that identifier, along with the state of “PENDING”, invokes the processing function
+     ​asynchronously​ with the identifier, and returns the identifier to the client. """
+
     try:
         if event['httpMethod'] == 'GET' and event['queryStringParameters']['query']:
             url = event['queryStringParameters']['query']
@@ -66,13 +65,12 @@ def post_url_and_identity(event, context):
         return dict(statusCode=200, body=str(e))
 
 
-""" This function gets called whenever the database table gets populated with a data record
-    It retrieves the identifier to retrieve the URL, makes a request to the URL to obtain a response and 
-    processes the response to extract the title and obtain the s3 URL of the response object and then
-                            updates the status to "PROCESSED" """
-
-
 def dynamo_trigger_stream(event, context):
+    """ This function gets called whenever the database table gets populated with a data record
+        It retrieves the identifier to retrieve the URL, makes a request to the URL to obtain a response and
+        processes the response to extract the title and obtain the s3 URL of the response object and then
+                                updates the status to "PROCESSED" """
+
     try:
         current_region = boto3.session.Session().region_name
         db = boto3.resource('dynamodb', region_name=current_region)
