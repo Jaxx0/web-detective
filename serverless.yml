@@ -6,8 +6,9 @@ plugins:
 provider:
   name: aws
   runtime: python3.7
-  stage: dev
-  region: eu-west-2
+  stage: dev-account
+  region: ${opt:region, 'eu-west-2'}      # Replace with your preferred region
+  account: ${opt:account, '159112706453'} # Replace with your provider's Account Id
 
   environment:
     BUCKET_NAME: ${self:service}-${self:provider.stage}-uploads
@@ -23,18 +24,18 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:eu-west-2:159112706453:table/*"
+      Resource: "arn:aws:dynamodb:${self:provider.region}:${self:provider.account}:table/*"
     - Effect: "Allow"
       Action:
         - s3:*
-      Resource: "arn:aws:s3:::web-detective-dev-uploads/*"
+      Resource: "arn:aws:s3:::${self:service}-${self:provider.stage}-uploads/*"
     - Effect: Allow
       Action:
         - lambda:InvokeFunction
         - lambda:InvokeAsync
         - lambda:AWSLambdaBasicExecutionRole
         - lambda:AWSLambda*/
-      Resource: "arn:aws:lambda:eu-west-2:159112706453:function:web-detective-dev-get_url_given_identifier"
+      Resource: "arn:aws:lambda:${self:provider.region}:${self:provider.account}:function:${self:service}-${self:provider.stage}-get_url_given_identifier"
     - Effect: "Allow"
       Action:
        - dynamodb:Query
@@ -50,7 +51,7 @@ provider:
        - logs:CreateLogGroup
        - logs:CreateLogStream
        - logs:PutLogEvents
-      Resource: "arn:aws:dynamodb:eu-west-2:159112706453:table/*"
+      Resource: "arn:aws:dynamodb:${self:provider.region}:${self:provider.account}:table/*"
 
 
 
@@ -72,7 +73,6 @@ functions:
 
   get_url_given_identifier:
     handler: handler.get_url_given_identifier
-    events:
 
   dynamo_trigger_stream:
     handler: handler.dynamo_trigger_stream
